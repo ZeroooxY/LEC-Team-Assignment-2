@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Classification App</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>🧠 CNN Image Classifier</h1>
+  <form action="/predict" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept="image/*" required>
+    <button type="submit">Prediksi</button>
+  </form>
+
+  {% if prediction %}
+  <h2>Hasil Prediksi:</h2>
+  <p><strong>{{ prediction }}</strong></p>
+  <img src="{{ image_path }}" alt="Uploaded Image" width="300">
+  {% endif %}
+</body>
+</html>
