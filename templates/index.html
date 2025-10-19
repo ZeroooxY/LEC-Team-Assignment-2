@@ -3,20 +3,213 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Classification App</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <title>🧠 Image Classification App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', Arial, sans-serif;
+      background-color: #f5f7fa;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background-color: #004aad;
+      color: white;
+      text-align: center;
+      padding: 15px 0;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+    }
+
+    h1 {
+      color: #004aad;
+      font-size: 28px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    form {
+      text-align: center;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 350px;
+    }
+
+    .file-upload {
+      display: inline-block;
+      background-color: #004aad;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .file-upload:hover {
+      background-color: #003380;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-name {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #666;
+      font-style: italic;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      margin-top: 15px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: background-color 0.3s, transform 0.1s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+      transform: scale(1.03);
+    }
+
+    img {
+      margin-top: 20px;
+      max-width: 300px;
+      border-radius: 10px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+    }
+
+    h2 {
+      margin-top: 30px;
+      color: #004aad;
+      text-align: center;
+    }
+
+    p {
+      font-size: 18px;
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    #predicted-filename {
+      margin-top: 10px;
+      color: #555;
+      font-style: italic;
+      text-align: center;
+    }
+
+    footer {
+      background-color: #004aad;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 14px;
+      margin-top: auto;
+      line-height: 1.6;
+    }
+  </style>
 </head>
 <body>
-  <h1>🧠 CNN Image Classifier</h1>
-  <form action="/predict" method="post" enctype="multipart/form-data">
-    <input type="file" name="file" accept="image/*" required>
-    <button type="submit">Prediksi</button>
-  </form>
+  <header>GROUP 8 - CNN Image Classification</header>
 
-  {% if prediction %}
-  <h2>Hasil Prediksi:</h2>
-  <p><strong>{{ prediction }}</strong></p>
-  <img src="{{ image_path }}" alt="Uploaded Image" width="300">
-  {% endif %}
+  <main>
+    <h1>🧠 CNN Image Classifier</h1>
+
+    <form action="/predict" method="post" enctype="multipart/form-data">
+      <label for="file-upload" class="file-upload">Choose File</label>
+      <input id="file-upload" type="file" name="file" accept="image/*" onchange="previewImage(event)" required>
+      <div class="file-name" id="file-name">No file chosen</div>
+      <br>
+      <button type="submit">Prediksi</button>
+
+      <!-- Preview saat user pilih gambar -->
+      <img id="preview" src="#" alt="Preview" style="display:none;">
+      <p id="preview-name" style="display:none; font-style:italic; color:#555;"></p>
+
+      {% if prediction %}
+        <h2>Hasil Prediksi:</h2>
+        <p><strong>{{ prediction }}</strong></p>
+        <img src="{{ image_path }}" alt="Uploaded Image" width="300" id="predicted-image">
+        <p id="predicted-filename"></p>
+      {% endif %}
+    </form>
+  </main>
+
+  <footer>
+    AGUS ARIYANTO - 2802541663<br>
+    NOVAL RAMADHAN - 2802513054<br>
+    ABIYAN FAJAR PUTRANTO - 2802513041<br>
+    RAVANO AKBAR WIDODO - 2802515482
+  </footer>
+
+  <script>
+    function previewImage(event) {
+      const preview = document.getElementById('preview');
+      const previewName = document.getElementById('preview-name');
+      const predictedImage = document.getElementById('predicted-image');
+      const predictedFilename = document.getElementById('predicted-filename');
+      const fileName = document.getElementById('file-name');
+      const file = event.target.files[0];
+
+      // Sembunyikan hasil prediksi lama (kalau ada)
+      if (predictedImage) predictedImage.style.display = 'none';
+      if (predictedFilename) predictedFilename.style.display = 'none';
+      const predictionTitle = document.querySelector('h2');
+      const predictionText = document.querySelector('p strong');
+      if (predictionTitle) predictionTitle.style.display = 'none';
+      if (predictionText) predictionText.parentElement.style.display = 'none';
+
+      // Tampilkan preview baru
+      if (file) {
+        fileName.textContent = file.name;
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+        previewName.textContent = file.name;
+        previewName.style.display = 'block';
+      } else {
+        fileName.textContent = "No file chosen";
+        preview.style.display = 'none';
+        previewName.style.display = 'none';
+      }
+    }
+
+    // Saat halaman selesai dimuat, jika ada gambar hasil prediksi, tampilkan nama file dari backend URL
+    window.addEventListener('load', () => {
+      const predictedImage = document.getElementById('predicted-image');
+      const predictedFilename = document.getElementById('predicted-filename');
+      if (predictedImage && predictedImage.src) {
+        const parts = predictedImage.src.split('/');
+        const filename = parts[parts.length - 1];
+        predictedFilename.textContent = filename;
+        predictedFilename.style.display = 'block';
+      }
+    });
+  </script>
 </body>
 </html>
